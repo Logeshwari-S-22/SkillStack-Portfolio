@@ -1,4 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @import "tailwindcss";
+
+/* Dark mode support */
+@variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
