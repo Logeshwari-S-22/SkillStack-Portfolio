@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 // ── Constants ──
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "Expert"];
@@ -96,7 +95,6 @@ function ProfilePanel({ profileUser, currentUser, onClose, dark }) {
         ]);
         setData({ skills: s.skills||[], projects: p.projects||[], certs: c.certifications||[], posts: po.posts||[] });
       } else {
-        // For other users, fetch their public posts from feed filtered by username
         const res = await fetch(`/api/posts/feed?username=${profileUser.username}`);
         const d = await res.json();
         setData(prev => ({ ...prev, posts: d.posts||[] }));
@@ -600,7 +598,7 @@ export default function HomePage() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("manual"); // ← CHANGED FROM "all" TO "manual"
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
   const [dark, setDark] = useState(true);
@@ -624,7 +622,7 @@ export default function HomePage() {
     setUser(JSON.parse(stored));
     const t = localStorage.getItem("theme");
     if (t) setDark(t === "dark");
-    fetchFeed(1, "all");
+    fetchFeed(1, "manual"); // ← CHANGED FROM "all" TO "manual"
   }, []);
 
   useEffect(() => {
@@ -695,7 +693,7 @@ export default function HomePage() {
       <nav className={`border-b ${th.nav} px-4 py-3 sticky top-0 z-20 shadow-sm`}>
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <span className="text-xl font-black bg-gradient-to-r from-violet-500 to-pink-500 bg-clip-text text-transparent shrink-0">
-            SkillStack<span className="text-violet-400">TN</span>
+            SkillVault<span className="text-violet-400">TN</span>
           </span>
 
           {/* Search */}
@@ -711,6 +709,47 @@ export default function HomePage() {
             <button onClick={() => setDark(!dark)} className={`w-9 h-9 rounded-full flex items-center justify-center text-base transition-colors ${th.btn}`}>
               {dark ? "☀️" : "🌙"}
             </button>
+
+            {/* ━━━ NEW AI BUTTONS ━━━ */}
+            <button
+              onClick={() => router.push("/ai-assistant")}
+              className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-2 rounded-lg transition-colors hidden sm:block"
+            >
+              🤖 AI Coach
+            </button>
+
+            <button
+              onClick={() => router.push("/assessments")}
+              className="bg-violet-600 hover:bg-violet-700 text-white text-xs px-3 py-2 rounded-lg transition-colors hidden sm:block"
+            >
+              📝 Assessments
+            </button>
+
+            <button
+              onClick={() => router.push("/profile")}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg transition-colors hidden sm:block"
+            >
+              👤 Profile
+            </button>
+
+            {/* Mobile dropdown menu */}
+            <div className="sm:hidden flex gap-1">
+              <button
+                onClick={() => router.push("/ai-assistant")}
+                className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-2 py-2 rounded-lg transition-colors"
+                title="AI Assistant"
+              >
+                🤖
+              </button>
+              <button
+                onClick={() => router.push("/assessments")}
+                className="bg-violet-600 hover:bg-violet-700 text-white text-xs px-2 py-2 rounded-lg transition-colors"
+                title="Assessments"
+              >
+                📝
+              </button>
+            </div>
+
             {user ? (
               <>
                 <button onClick={openOwnProfile} className="flex items-center gap-2 hover:opacity-80 transition-opacity">

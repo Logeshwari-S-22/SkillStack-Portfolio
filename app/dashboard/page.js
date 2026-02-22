@@ -333,6 +333,12 @@ const importGithubRepo = async (repo) => {
         </h1>
         <div className="flex items-center gap-3">
           <span className="text-gray-400 text-sm hidden sm:block">👋 {user.name}</span>
+          <button
+  onClick={() => router.push("/assessments")}
+  className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-lg font-semibold"
+>
+  📝 Take Assessment
+</button>
           <span className="bg-violet-900 text-violet-300 text-xs px-3 py-1 rounded-full font-semibold">
             ⚡ {xp} XP
           </span>

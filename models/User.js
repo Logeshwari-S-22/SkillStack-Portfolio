@@ -1,109 +1,72 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const UserSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-      minlength: 6,
-    },
-    username: {
-      type: String,
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    bio: {
-      type: String,
-      default: "",
-      maxlength: 300,
-    },
-    avatar: {
-      type: String,
-      default: "",
-    },
-    github: {
-      type: String,
-      default: "",
-    },
-    linkedin: {
-      type: String,
-      default: "",
-    },
-    // XP points for leaderboard
-    xp: {
-      type: Number,
-      default: 0,
-    },
-    // Skills array (embedded)
-    skills: [
-      {
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true },
+  avatar: { type: String },
+  headline: { type: String }, // "Software Engineer at Google"
+  bio: { type: String },
+  location: { type: String },
+  
+  // Education
+  education: [{
+    school: String,
+    degree: String,
+    fieldOfStudy: String,
+    startDate: Date,
+    endDate: Date,
+    isCurrentlyStudying: Boolean,
+  }],
+  
+  // Work Experience
+  experience: [{
+    company: String,
+    position: String,
+    employmentType: String, // Full-time, Part-time, Freelance
+    startDate: Date,
+    endDate: Date,
+    isCurrentlyWorking: Boolean,
+    description: String,
+  }],
+  
+  // Skills
+  skills: [{
     name: String,
-    level: {
-      type: String,
-      enum: ["Beginner", "Intermediate", "Advanced", "Expert"],
-    },
-    source: {
-      type: String,
-      enum: ["manual", "ai-detected", "project-detected", "certificate-detected", "hackerrank"],
-      default: "manual",
-    },
-    verified: { type: Boolean, default: false }, // true after passing assessment
-    addedAt: { type: Date, default: Date.now },
-  },
-    ],
-    // Projects array (embedded)
-    projects: [
-      {
-        title: String,
-        description: String,
-        techStack: [String],
-        githubUrl: String,
-        demoUrl: String,
-        startDate: Date,
-        endDate: Date,
-      },
-    ],
-    // Certifications
-    certifications: [
-      {
-        title: String,
-        issuer: String,
-        issueDate: Date,
-        credentialUrl: String,
-        credentialId: String,
-      },
-    ],
-    // Badges earned
-    badges: [
-      {
-        name: String,
-        description: String,
-        earnedAt: { type: Date, default: Date.now },
-      },
-    ],
-    // Portfolio visibility
-    isPublic: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  {
-    timestamps: true, // auto adds createdAt and updatedAt
-  }
-);
+    proficiency: String, // Beginner, Intermediate, Advanced, Expert
+    endorsements: { type: Number, default: 0 },
+    yearsOfExperience: Number,
+  }],
+  
+  // Assessment Data
+  credentials: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Credential' }],
+  assessments: [{
+    skill: String,
+    score: Number,
+    level: String,
+    passed: Boolean,
+    completedAt: Date,
+  }],
+  
+  // Stats
+  xp: { type: Number, default: 0 },
+  rank: { type: Number },
+  totalAssessmentsTaken: { type: Number, default: 0 },
+  averageScore: { type: Number, default: 0 },
+  
+  // AI Chat History
+  chatHistory: [{
+    userMessage: String,
+    aiResponse: String,
+    timestamp: { type: Date, default: Date.now },
+  }],
+  
+  // Recommendations
+  recommendedSkills: [String],
+  lastRecommendationUpdate: Date,
+  
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
 
-// Prevent model re-compilation in development
-export default mongoose.models.User || mongoose.model("User", UserSchema);
+export default mongoose.models.User || mongoose.model('User', userSchema);

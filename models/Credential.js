@@ -1,51 +1,30 @@
-import mongoose from "mongoose";
-import crypto from "crypto";
+import mongoose from 'mongoose';
 
-const CredentialSchema = new mongoose.Schema({
-  // Owner
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  userName: { type: String, required: true },
-  userUsername: { type: String, required: true },
-
-  // Credential details
+const credentialSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  credentialId: { type: String, unique: true, required: true },
   skill: { type: String, required: true },
-  level: {
-    type: String,
-    enum: ["Beginner", "Intermediate", "Advanced", "Expert"],
-    required: true,
-  },
-  score: { type: Number, required: true },  // test score 0-100
-
-  // Verification
-  credentialId: {
-    type: String,
-    unique: true,
-    default: () => crypto.randomUUID(),
-  },
+  level: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'], required: true },
+  score: { type: Number, required: true },
+  assessmentType: { type: String, enum: ['mcq', 'code'], required: true },
+  difficulty: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'], required: true },
+  issueDate: { type: Date, default: Date.now },
+  expiresAt: { type: Date },
+  status: { type: String, enum: ['active', 'revoked', 'expired'], default: 'active' },
   verifyUrl: { type: String },
-
-  // Assessment reference
-  assessmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Assessment" },
-
-  // Validity
-  issuedAt: { type: Date, default: Date.now },
-  expiresAt: {
-    type: Date,
-    default: () => new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-  },
-  isValid: { type: Boolean, default: true },
-
-  // Anti-cheat clean flag
-  isClean: { type: Boolean, default: true },
-
+  qrCode: { type: String },
+  shareCount: { type: Number, default: 0 },
+  sharedWith: [{ platform: String, sharedAt: Date }],
 }, { timestamps: true });
 
-// Auto-set verifyUrl before saving
-CredentialSchema.pre("save", function(next) {
+credentialSchema.pre('save', function(next) {
+  if (!this.credentialId) {
+    this.credentialId = `CRED-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
   if (!this.verifyUrl) {
-    this.verifyUrl = `/verify/${this.credentialId}`;
+    this.verifyUrl = `/credentials/verify/${this.credentialId}`;
   }
   next();
 });
 
-export default mongoose.models.Credential || mongoose.model("Credential", CredentialSchema);
+export default mongoose.models.Credential || mongoose.model('Credential', credentialSchema);
