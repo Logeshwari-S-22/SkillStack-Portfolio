@@ -20,26 +20,55 @@ export async function GET(req) {
 
     await connectDB();
     const user = await User.findById(decoded.id).select("projects xp");
-    return NextResponse.json({ projects: user.projects, xp: user.xp });
+    
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    return NextResponse.json({ 
+      projects: user.projects || [], 
+      xp: user.xp || 0 
+    });
   } catch (err) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("❌ GET /api/projects error:", err.message);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
 // POST → add project + auto-create post
 export async function POST(req) {
   try {
+    console.log("=== POST /api/projects ===");
+    
+    // FIRST: Define decoded
     const decoded = getUserFromToken(req);
+    console.log("User ID:", decoded?.id);
+    
     if (!decoded) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    // SECOND: Define title, description
     const { title, description, techStack, githubUrl, demoUrl, source } = await req.json();
+    console.log("Request data:", { title, description, source, githubUrl });
 
     if (!title || !description) {
       return NextResponse.json({ error: "Title and description are required" }, { status: 400 });
     }
 
+    // THIRD: Define user
     await connectDB();
     const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      console.error("❌ User not found");
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    console.log("✅ User found:", user.name);
+    // ← INITIALIZE PROJECTS ARRAY RIGHT HERE!
+    if (!Array.isArray(user.projects)) {
+      console.log("⚠️ Projects is not array, initializing...");
+      user.projects = [];
+    }
 
     // Prevent duplicate GitHub projects
     if (githubUrl) {
@@ -54,7 +83,10 @@ export async function POST(req) {
       ? techStack.split(",").map(t => t.trim()).filter(Boolean)
       : [];
 
-    // Save project to user
+
+    console.log("Projects count before:", user.projects.length);
+
+    // Add project
     user.projects.push({
       title,
       description,
@@ -64,32 +96,43 @@ export async function POST(req) {
       source: source || "manual",
     });
     user.xp += 20;
+    
+    console.log("✅ Saving user...");
     await user.save();
+    console.log("✅ User saved successfully");
 
-    // Auto-create a post only for GitHub imports
     if (source === "github") {
-      await Post.create({
-        userId: decoded.id,
-        userName: decoded.name,
-        userUsername: decoded.username,
-        type: "github",
-        title: `🐙 Added "${title}" from GitHub!`,
-        description: description || "",
-        link: githubUrl || demoUrl || "",
-        tags: [...techArray.slice(0, 3), "GitHub", "Project"],
-      });
+      try {
+        await Post.create({
+          userId: decoded.id,
+          userName: decoded.name,
+          userUsername: decoded.username,
+          type: "github",
+          title: `🐙 Added "${title}" from GitHub!`,
+          description: description || "",
+          link: githubUrl || demoUrl || "",
+          tags: [...techArray.slice(0, 3), "GitHub", "Project"],
+        });
+        console.log("✅ GitHub post created");
+      } catch (postErr) {
+        console.error("⚠️ Failed to create post:", postErr.message);
+      }
     }
+
+    console.log("✅ Project added successfully");
 
     return NextResponse.json(
       { message: "Project added!", projects: user.projects, xp: user.xp },
       { status: 201 }
     );
+    
   } catch (err) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("❌ POST /api/projects error:", err.message);
+    console.error("Stack:", err.stack);
+    return NextResponse.json({ error: "Server error: " + err.message }, { status: 500 });
   }
 }
 
-// DELETE → remove a project
 export async function DELETE(req) {
   try {
     const decoded = getUserFromToken(req);
@@ -99,12 +142,23 @@ export async function DELETE(req) {
     await connectDB();
 
     const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      console.error("❌ User not found");
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (!Array.isArray(user.projects)) {
+      user.projects = [];
+    }
+
     user.projects = user.projects.filter(p => p._id.toString() !== projectId);
     user.xp = Math.max(0, user.xp - 20);
     await user.save();
 
     return NextResponse.json({ message: "Project removed", projects: user.projects });
   } catch (err) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("❌ DELETE /api/projects error:", err.message);
+    return NextResponse.json({ error: "Server error: " + err.message }, { status: 500 });
   }
 }

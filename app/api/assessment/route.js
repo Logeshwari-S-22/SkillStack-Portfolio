@@ -5,15 +5,12 @@ import { askGemini } from "@/lib/gemini";
 import User from "@/models/User";
 import Credential from "@/models/Credential";
 import Assessment from "@/models/Assessment";
-import AssessmentSession from "@/models/AssessmentSession"; // NEW MODEL NEEDED
+import AssessmentSession from "@/models/AssessmentSession";
 
 const SECRET = new TextEncoder().encode(
   process.env.NEXTAUTH_SECRET || "skillstacktn_super_secret_key_2024"
 );
 
-// ============================================
-// POST - Submit assessment (CORRECTED)
-// ============================================
 export async function POST(req) {
   try {
     console.log("=== POST /api/assessment ===");
@@ -287,7 +284,7 @@ export async function GET(req) {
 
     if (type === "mcq") {
       // ✅ IMPROVED: Better prompt for quality questions
-      const prompt = `Generate 5 high-quality multiple choice questions about ${skill} at ${difficulty} level.
+      const prompt = `Generate 10 high-quality multiple choice questions about ${skill} at ${difficulty} level.
 
 IMPORTANT REQUIREMENTS:
 - Each question should be specific and test real knowledge

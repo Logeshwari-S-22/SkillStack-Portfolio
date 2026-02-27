@@ -29,8 +29,7 @@ export default function AIAssistantPage() {
       const data = await res.json();
       setProfile(data);
 
-      // Add initial greeting
-      const greeting = `👋 Hi ${data.name}! I'm your AI Career Coach.
+      const greeting = ` Hi ${data.name}! I'm your AI Career Coach.
 
 Based on your profile:
 📚 Education: ${data.education?.length || 0}
@@ -69,6 +68,7 @@ What would you like to explore?`;
       const res = await fetch("/api/ai/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ targetRole }),
       });
 
@@ -134,6 +134,7 @@ I've created a personalized weekly learning plan for you! Click "View Learning P
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           message: userMessage,
           profile: profile,

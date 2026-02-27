@@ -113,6 +113,7 @@ export default function TakeAssessment() {
       const res = await fetch("/api/assessment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           skill: assessment.skill,
           difficulty: assessment.difficulty,

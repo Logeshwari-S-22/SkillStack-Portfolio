@@ -43,7 +43,6 @@ Provide helpful, personalized advice. Be encouraging and constructive.`;
 
     const response = await askGemini(fullPrompt, false);
 
-    // Save to chat history
     await connectDB();
     await User.findByIdAndUpdate(userId, {
       $push: {

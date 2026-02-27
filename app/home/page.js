@@ -115,6 +115,7 @@ function ProfilePanel({ profileUser, currentUser, onClose, dark }) {
     const res = await fetch("/api/follow", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ targetUserId: profileUser.id }),
     });
     const d = await res.json();
@@ -134,6 +135,7 @@ function ProfilePanel({ profileUser, currentUser, onClose, dark }) {
     const res = await fetch("/api/skills", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(skillForm),
     });
     const d = await res.json();
@@ -162,6 +164,7 @@ function ProfilePanel({ profileUser, currentUser, onClose, dark }) {
     const res = await fetch("/api/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ ...repo, source: "github" }),
     });
     const d = await res.json();
@@ -219,6 +222,7 @@ function ProfilePanel({ profileUser, currentUser, onClose, dark }) {
     const res = await fetch("/api/hackerrank", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ certificates: hrSelected.certs, badges: hrSelected.badges, hackerrankUsername: hrUsername }),
     });
     const d = await res.json();

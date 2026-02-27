@@ -93,6 +93,7 @@ export default function FeedPage() {
     const res = await fetch("/api/posts/share", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ postId }),
     });
     const data = await res.json();
@@ -107,6 +108,7 @@ export default function FeedPage() {
     const res = await fetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ ...postForm, type: "manual" }),
     });
     const data = await res.json();
@@ -123,6 +125,7 @@ export default function FeedPage() {
     await fetch("/api/posts", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ postId }),
     });
     setPosts(prev => prev.filter(p => p._id !== postId));

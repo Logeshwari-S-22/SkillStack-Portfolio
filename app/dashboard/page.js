@@ -84,7 +84,7 @@ const fetchAllData = async () => {
 };
   // Add this function after fetchAllData()
 const syncToFeed = async () => {
-  const res = await fetch("/api/sync", { method: "POST" });
+  const res = await fetch("/api/sync", { method: "POST",credentials: "include" });
   const data = await res.json();
   if (res.ok) showMsg("success", data.message);
   else showMsg("error", data.error);
@@ -96,6 +96,7 @@ const syncToFeed = async () => {
     const res = await fetch("/api/skills", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(skillForm),
     });
     const data = await res.json();
@@ -115,6 +116,7 @@ const syncToFeed = async () => {
     const res = await fetch("/api/skills", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ skillId }),
     });
     const data = await res.json();
@@ -128,6 +130,7 @@ const syncToFeed = async () => {
     const res = await fetch("/api/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(projectForm),
     });
     const data = await res.json();
@@ -147,6 +150,7 @@ const syncToFeed = async () => {
     const res = await fetch("/api/projects", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ projectId }),
     });
     const data = await res.json();
@@ -160,6 +164,7 @@ const syncToFeed = async () => {
     const res = await fetch("/api/certifications", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(certForm),
     });
     const data = await res.json();
@@ -179,6 +184,7 @@ const syncToFeed = async () => {
     const res = await fetch("/api/certifications", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ certId }),
     });
     const data = await res.json();
@@ -202,6 +208,7 @@ const importHRCert = async () => {
   const res = await fetch("/api/hackerrank", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({
       certId: hrCertData.certId,
       certName: hrCertData.certName,
@@ -234,6 +241,7 @@ const createPost = async () => {
   const res = await fetch("/api/posts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ ...postForm, type: "manual" }),
   });
   const data = await res.json();
@@ -270,6 +278,7 @@ const importGithubRepo = async (repo) => {
   const res = await fetch("/api/projects", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({
       title: repo.title,
       description: repo.description,
@@ -897,6 +906,7 @@ const importGithubRepo = async (repo) => {
                           await fetch("/api/posts", {
                             method: "DELETE",
                             headers: { "Content-Type": "application/json" },
+                            credentials: "include",
                             body: JSON.stringify({ postId: post._id }),
                           });
                           setMyPosts(myPosts.filter(p => p._id !== post._id));

@@ -24,7 +24,6 @@ export async function GET(req) {
     const followers = await Follow.countDocuments({ followingId: userId });
     const following = await Follow.countDocuments({ followerId: userId });
 
-    // Check if current user follows this profile
     const decoded = getUserFromToken(req);
     let isFollowing = false;
     if (decoded) {
@@ -41,13 +40,24 @@ export async function GET(req) {
   }
 }
 
-// POST → follow or unfollow a user (toggle)
 export async function POST(req) {
   try {
+    console.log("=== POST /api/follow ===");
+    
     const decoded = getUserFromToken(req);
-    if (!decoded) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    console.log("Decoded:", decoded); // ← Log what we got
+    
+    if (!decoded) {
+      console.error("❌ No token/decoded");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { targetUserId } = await req.json();
+    console.log("Target user:", targetUserId);
+
+    if (!targetUserId) {
+      return NextResponse.json({ error: "targetUserId required" }, { status: 400 });
+    }
 
     if (decoded.id === targetUserId) {
       return NextResponse.json({ error: "Cannot follow yourself" }, { status: 400 });
@@ -55,33 +65,48 @@ export async function POST(req) {
 
     await connectDB();
 
-    // Find target user
-    const targetUser = await User.findById(targetUserId).select("name username");
-    if (!targetUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const targetUser = await User.findById(targetUserId);
+    console.log("Target user found:", targetUser?.username);
+    
+    if (!targetUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    // Check if already following
     const existing = await Follow.findOne({
       followerId: decoded.id,
       followingId: targetUserId,
     });
+    console.log("Already following:", !!existing);
 
     if (existing) {
-      // Unfollow
       await Follow.findByIdAndDelete(existing._id);
+      console.log("✅ Unfollowed");
       return NextResponse.json({ message: "Unfollowed", isFollowing: false });
     } else {
-      // Follow
-      await Follow.create({
+      // ← ADD SAFETY CHECKS
+      const followData = {
         followerId: decoded.id,
-        followerName: decoded.name,
-        followerUsername: decoded.username,
         followingId: targetUserId,
-        followingName: targetUser.name,
-        followingUsername: targetUser.username,
-      });
+      };
+      
+      // Only add these if they exist
+      if (decoded.name) followData.followerName = decoded.name;
+      if (decoded.username) followData.followerUsername = decoded.username;
+      if (targetUser.name) followData.followingName = targetUser.name;
+      if (targetUser.username) followData.followingUsername = targetUser.username;
+      
+      console.log("Creating follow with:", followData);
+      
+      const follow = await Follow.create(followData);
+      console.log("✅ Following created:", follow._id);
+      
       return NextResponse.json({ message: "Following!", isFollowing: true });
     }
   } catch (err) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("Follow POST error:", err.message);  // ← LOG ERROR!
+    console.error("Stack:", err.stack);                 // ← LOG STACK!
+    return NextResponse.json({ 
+      error: "Server error: " + err.message  // ← SEND ERROR TO FRONTEND!
+    }, { status: 500 });
   }
 }

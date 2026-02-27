@@ -56,6 +56,7 @@ export async function POST(req) {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         client_id: GITHUB_CLIENT_ID,
         client_secret: GITHUB_CLIENT_SECRET,

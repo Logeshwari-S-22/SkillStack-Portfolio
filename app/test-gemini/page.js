@@ -16,6 +16,7 @@ export default function TestGemini() {
       const res = await fetch("/api/test-gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ prompt }),
       });
       const data = await res.json();

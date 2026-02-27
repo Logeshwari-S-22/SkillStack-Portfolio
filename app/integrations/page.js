@@ -25,6 +25,7 @@ export default function IntegrationsPage() {
       const res = await fetch("/api/integrations/github", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ code: authCode }),
       });
 

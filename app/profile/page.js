@@ -99,6 +99,7 @@ export default function ProfilePage() {
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
